@@ -8,12 +8,15 @@ fn main() {
     let unsat_data = rng_tr_data(m);
 
     // local trust values
-    let s_i_j = mat_sub(sat_data, unsat_data);
+    let s = mat_sub(sat_data, unsat_data);
 
     // normalized local trust values
-    let c_i_j = normalize(s_i_j);
+    let c = normalize(s);
 
-    println!("Normalized local trust values:: {c_i_j:?}");
+    // inversed
+    let c_t = mat_inverse(c);
+
+    println!("Inversed normalized local trust values:: {c_t:?}");
 }
 
 fn rng_tr_data(m: usize) -> Vec<Vec<u8>> {
@@ -61,4 +64,15 @@ fn normalize(s: Vec<Vec<i16>>) -> Vec<Vec<f64>> {
     }
 
     res
+}
+
+fn mat_inverse(mat: Vec<Vec<f64>>) -> Vec<Vec<f64>> {
+    let m = mat.len();
+    let mut inversed = vec![vec![0.0; m]; m];
+    for i in 0..m {
+        for j in 0..m {
+            inversed[i][j] = mat[j][i];
+        }
+    }
+    inversed
 }
