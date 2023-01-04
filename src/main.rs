@@ -14,9 +14,15 @@ fn main() {
     let c = normalize(s);
 
     // inversed
-    let c_t = mat_inverse(c);
+    let c_t = mat_inverse(c.clone());
 
-    println!("Inversed normalized local trust values:: {c_t:?}");
+    // Get the converged c_t value
+    let converged_c_t = converge(c_t);
+
+    // Final t vector
+    let t = mat_mul(converged_c_t, c);
+
+    println!("Global trust values:: {t:?}");
 }
 
 fn rng_tr_data(m: usize) -> Vec<Vec<u8>> {
@@ -75,4 +81,26 @@ fn mat_inverse(mat: Vec<Vec<f64>>) -> Vec<Vec<f64>> {
         }
     }
     inversed
+}
+
+fn mat_mul(a: Vec<Vec<f64>>, b: Vec<Vec<f64>>) -> Vec<Vec<f64>> {
+    let m = a.len();
+
+    let mut c = vec![vec![0.0; m]; m];
+    for i in 0..m {
+        for j in 0..m {
+            c[i][j] += a[i][j] * b[j][i];
+        }
+    }
+
+    c
+}
+
+fn converge(c_t: Vec<Vec<f64>>) -> Vec<Vec<f64>> {
+    let mut res = c_t.clone();
+    for _ in 0..10 {
+        res = mat_mul(res, c_t.clone());
+    }
+
+    res
 }
