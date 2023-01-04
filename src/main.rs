@@ -29,10 +29,14 @@ fn rng_tr_data(m: usize) -> Vec<Vec<u8>> {
     let mut rng = rand::thread_rng();
     let mut sat: Vec<Vec<u8>> = vec![];
 
-    for _ in 0..m {
+    for i in 0..m {
         let mut sat_i: Vec<u8> = vec![];
-        for _ in 0..m {
-            sat_i.push(rng.gen::<u8>());
+        for j in 0..m {
+            if i != j {
+                sat_i.push(rng.gen::<u8>());
+            } else {
+                sat_i.push(0);
+            }
         }
         sat.push(sat_i);
     }
