@@ -3,6 +3,8 @@ use rand::Rng;
 mod utils;
 use utils::csv::write_to_csv_file;
 
+use crate::utils::csv::read_from_csv_file;
+
 fn main() {
     println!("Hello, world!");
 
@@ -10,12 +12,16 @@ fn main() {
     let sat_data_file_path: String = "sat_downloads.csv".to_string();
     let unsat_data_file_path: String = "unsat_downloads.csv".to_string();
 
-    // // Generate random data & write to files for future use
-    // let sat_downloads = rng_tr_data(m);
-    // write_to_csv_file(&sat_data_file_path, m, &sat_downloads).unwrap();
+    // Generate random data & write to files for future use
+    let sat_downloads = rng_tr_data(m);
+    write_to_csv_file(&sat_data_file_path, m, &sat_downloads).unwrap();
 
-    // let unsat_downloads = rng_tr_data(m);
-    // write_to_csv_file(&unsat_data_file_path, m, &unsat_downloads).unwrap();
+    let unsat_downloads = rng_tr_data(m);
+    write_to_csv_file(&unsat_data_file_path, m, &unsat_downloads).unwrap();
+
+    // Read downloads data for eigentrust computation
+    let sat_data = read_from_csv_file(&sat_data_file_path).unwrap();
+    let unsat_data = read_from_csv_file(&unsat_data_file_path).unwrap();
 
     // // local trust values
     // let s = mat_sub(sat_data, unsat_data);
