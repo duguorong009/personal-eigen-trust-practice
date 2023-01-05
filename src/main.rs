@@ -1,33 +1,41 @@
-use rand::Rng;
-
 mod utils;
-use utils::csv::write_to_csv_file;
+use nalgebra::SMatrix;
 
-use crate::utils::csv::read_from_csv_file;
+use crate::utils::csv::{read_from_csv_file, write_to_csv_file};
+use crate::utils::random::gen_random_downloads_data;
+
+const M: usize = 10; // count of peers
 
 fn main() {
     println!("Hello, world!");
 
-    let m = 10; // count of peers
     let sat_data_file_path: String = "sat_downloads.csv".to_string();
     let unsat_data_file_path: String = "unsat_downloads.csv".to_string();
 
-    // Generate random data & write to files for future use
-    let sat_downloads = rng_tr_data(m);
-    write_to_csv_file(&sat_data_file_path, m, &sat_downloads).unwrap();
+    // // Generate random data & write to files for future use
+    // let sat_downloads = gen_random_downloads_data(m);
+    // write_to_csv_file(&sat_data_file_path, m, &sat_downloads).unwrap();
 
-    let unsat_downloads = rng_tr_data(m);
-    write_to_csv_file(&unsat_data_file_path, m, &unsat_downloads).unwrap();
+    // let unsat_downloads = gen_random_downloads_data(m);
+    // write_to_csv_file(&unsat_data_file_path, m, &unsat_downloads).unwrap();
 
     // Read downloads data for eigentrust computation
     let sat_data = read_from_csv_file(&sat_data_file_path).unwrap();
     let unsat_data = read_from_csv_file(&unsat_data_file_path).unwrap();
 
+    // Convert the downloads data to matrix for operations
+    let sat_mat: SMatrix<f64, M, M> =
+        SMatrix::from_vec(sat_data.concat().into_iter().map(|v| v as f64).collect());
+    let unsat_mat: SMatrix<f64, M, M> =
+        SMatrix::from_vec(unsat_data.concat().into_iter().map(|v| v as f64).collect());
+
     // // local trust values
     // let s = mat_sub(sat_data, unsat_data);
+    let s: SMatrix<f64, M, M> = sat_mat - unsat_mat;
 
     // // normalized local trust values
     // let c = normalize(s);
+    let c: SMatrix<f64, M, M> = normalize_mat(s);
 
     // // inversed
     // let c_t = mat_inverse(c.clone());
@@ -39,25 +47,6 @@ fn main() {
     // let t = mat_mul(converged_c_t, c);
 
     // println!("Global trust values:: {t:?}");
-}
-
-fn rng_tr_data(m: usize) -> Vec<Vec<u8>> {
-    let mut rng = rand::thread_rng();
-    let mut sat: Vec<Vec<u8>> = vec![];
-
-    for i in 0..m {
-        let mut sat_i: Vec<u8> = vec![];
-        for j in 0..m {
-            if i != j {
-                sat_i.push(rng.gen::<u8>());
-            } else {
-                sat_i.push(0);
-            }
-        }
-        sat.push(sat_i);
-    }
-
-    sat
 }
 
 fn mat_sub(a: Vec<Vec<u8>>, b: Vec<Vec<u8>>) -> Vec<Vec<i16>> {
@@ -90,6 +79,22 @@ fn normalize(s: Vec<Vec<i16>>) -> Vec<Vec<f64>> {
     }
 
     res
+}
+
+fn normalize_mat(s: SMatrix<f64, M, M>) -> SMatrix<f64, M, M> {
+    let mut res: Vec<Vec<f64>> = vec![vec![0.0; M]; M];
+    for r in 0..M {
+        let sum = s.row(r).iter().map(|v| v.max(0.0)).sum::<f64>();
+        for c in 0..M {
+            res[r][c] = if sum == 0.0 {
+                1.0 / M as f64 // TODO: Should be the trust value of initial trusted peers - p_i
+            } else {
+                s[(r, c)].max(0.0) / sum
+            }
+        }
+    }
+
+    SMatrix::from_vec(res.concat())
 }
 
 fn mat_inverse(mat: Vec<Vec<f64>>) -> Vec<Vec<f64>> {
