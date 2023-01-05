@@ -27,7 +27,7 @@ fn main() {
     // normalized local trust values : c(i, j)
     let c: SMatrix<f64, M, M> = custom_normalize(s);
 
-    basic_eigentrust_algo(c);
+    simple_non_distributed_eigen_trust(c);
 }
 
 /// Generate random data for simulation & save to files for future use
@@ -39,8 +39,8 @@ fn generate_sim_data() {
     write_to_csv_file(&UNSAT_DATA_FILE, M, &unsat_downloads).unwrap();
 }
 
-/// Simple centralized trust value computing algorithm (basic EigenTrust algorithm)
-fn basic_eigentrust_algo(c: SMatrix<f64, M, M>) {
+/// Simple centralized trust value computing algorithm (Algorithm 1. Simple non-distributed EigenTrust algorithm)
+fn simple_non_distributed_eigen_trust(c: SMatrix<f64, M, M>) {
     let mut t_i = c.clone(); // t_0 = c_0
     let mut t_i_next: Matrix<f64, U10, U10, ArrayStorage<f64, M, M>> = Matrix::default();
 
@@ -62,7 +62,7 @@ fn basic_eigentrust_algo(c: SMatrix<f64, M, M>) {
     println!("after {n} iterations!");
 }
 
-/// Normalize the matrix of local trust values(`s_i_j`) by using the
+/// Normalize the matrix of local trust values s(i, j) by using the
 /// formula from eigen-trust algorithm.
 ///
 /// Ref: https://en.wikipedia.org/wiki/EigenTrust
