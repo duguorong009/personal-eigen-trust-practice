@@ -29,16 +29,14 @@ fn main() {
     let unsat_mat: SMatrix<f64, M, M> =
         SMatrix::from_vec(unsat_data.concat().into_iter().map(|v| v as f64).collect());
 
-    // // local trust values
-    // let s = mat_sub(sat_data, unsat_data);
+    // // local trust values : s_i_j
     let s: SMatrix<f64, M, M> = sat_mat - unsat_mat;
 
-    // // normalized local trust values
-    // let c = normalize(s);
-    let c: SMatrix<f64, M, M> = normalize_mat(s);
+    // // normalized local trust values : c_i_j
+    let c: SMatrix<f64, M, M> = custom_normalize(s);
 
-    // // inversed
-    // let c_t = mat_inverse(c.clone());
+    // // transposed local trust values: C_T
+    // let c_t = c.transpose();
 
     // // Get the converged c_t value
     // let converged_c_t = converge(c_t);
@@ -49,39 +47,7 @@ fn main() {
     // println!("Global trust values:: {t:?}");
 }
 
-fn mat_sub(a: Vec<Vec<u8>>, b: Vec<Vec<u8>>) -> Vec<Vec<i16>> {
-    let m = a.len();
-
-    let mut res: Vec<Vec<i16>> = vec![vec![0; m]; m];
-
-    for i in 0..m {
-        for j in 0..m {
-            res[i][j] = a[i][j] as i16 - b[i][j] as i16;
-        }
-    }
-
-    res
-}
-
-fn normalize(s: Vec<Vec<i16>>) -> Vec<Vec<f64>> {
-    let m = s.len();
-    let mut res: Vec<Vec<f64>> = vec![vec![0.0; m]; m];
-
-    for i in 0..m {
-        for j in 0..m {
-            let sum = s[i].iter().map(|s_i_j| s_i_j.max(&0)).sum::<i16>();
-            res[i][j] = if sum == 0 {
-                1.0 / m as f64 // TODO: should be the trust value of initial trusted peers - p_i
-            } else {
-                s[i][j].max(0) as f64 / sum as f64
-            };
-        }
-    }
-
-    res
-}
-
-fn normalize_mat(s: SMatrix<f64, M, M>) -> SMatrix<f64, M, M> {
+fn custom_normalize(s: SMatrix<f64, M, M>) -> SMatrix<f64, M, M> {
     let mut res: Vec<Vec<f64>> = vec![vec![0.0; M]; M];
     for r in 0..M {
         let sum = s.row(r).iter().map(|v| v.max(0.0)).sum::<f64>();
@@ -95,37 +61,4 @@ fn normalize_mat(s: SMatrix<f64, M, M>) -> SMatrix<f64, M, M> {
     }
 
     SMatrix::from_vec(res.concat())
-}
-
-fn mat_inverse(mat: Vec<Vec<f64>>) -> Vec<Vec<f64>> {
-    let m = mat.len();
-    let mut inversed = vec![vec![0.0; m]; m];
-    for i in 0..m {
-        for j in 0..m {
-            inversed[i][j] = mat[j][i];
-        }
-    }
-    inversed
-}
-
-fn mat_mul(a: Vec<Vec<f64>>, b: Vec<Vec<f64>>) -> Vec<Vec<f64>> {
-    let m = a.len();
-
-    let mut c = vec![vec![0.0; m]; m];
-    for i in 0..m {
-        for j in 0..m {
-            c[i][j] += a[i][j] * b[j][i];
-        }
-    }
-
-    c
-}
-
-fn converge(c_t: Vec<Vec<f64>>) -> Vec<Vec<f64>> {
-    let mut res = c_t.clone();
-    for _ in 0..10 {
-        res = mat_mul(res, c_t.clone());
-    }
-
-    res
 }
