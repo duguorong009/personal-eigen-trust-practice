@@ -1,5 +1,5 @@
 mod utils;
-use nalgebra::SMatrix;
+use nalgebra::{ArrayStorage, EuclideanNorm, Matrix, Norm, SMatrix, U1, U10};
 
 use crate::utils::csv::{read_from_csv_file, write_to_csv_file};
 use crate::utils::random::gen_random_downloads_data;
@@ -38,13 +38,25 @@ fn main() {
     // // transposed local trust values: C_T
     // let c_t = c.transpose();
 
-    // // Get the converged c_t value
-    // let converged_c_t = converge(c_t);
+    let mut t_i = c.clone(); // t_0 = c_0
+    let mut t_i_next: Matrix<f64, U10, U10, ArrayStorage<f64, M, M>> = Matrix::default();
 
-    // // Final t vector
-    // let t = mat_mul(converged_c_t, c);
+    let mut n = 0;
+    let mut sig = f64::MAX;
+    let err = 0.05;
 
-    // println!("Global trust values:: {t:?}");
+    while sig > err {
+        c.tr_mul_to(&t_i, &mut t_i_next);
+
+        sig = (t_i_next - t_i).norm();
+
+        t_i = t_i_next;
+
+        n += 1;
+    }
+
+    println!("t_i: {t_i:?}");
+    println!("after {n} iterations!");
 }
 
 fn custom_normalize(s: SMatrix<f64, M, M>) -> SMatrix<f64, M, M> {
