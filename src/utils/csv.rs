@@ -1,3 +1,8 @@
+/// Write data(m * m matrix) to the csv file
+///
+/// # Error
+///
+/// If an error occurs, the error is returned to caller.
 pub fn write_to_csv_file(
     path: &str,
     m: usize,

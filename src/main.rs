@@ -59,8 +59,13 @@ fn main() {
     println!("after {n} iterations!");
 }
 
+/// Normalize the matrix of local trust values(`s_i_j`) by using the
+/// formula from eigen-trust algorithm.
+///
+/// Ref: https://en.wikipedia.org/wiki/EigenTrust
 fn custom_normalize(s: SMatrix<f64, M, M>) -> SMatrix<f64, M, M> {
     let mut res: Vec<Vec<f64>> = vec![vec![0.0; M]; M];
+
     for r in 0..M {
         let sum = s.row(r).iter().map(|v| v.max(0.0)).sum::<f64>();
         for c in 0..M {

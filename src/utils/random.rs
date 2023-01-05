@@ -1,5 +1,6 @@
 use rand::Rng;
 
+/// Generate the data of downloads by using the RNG
 pub fn gen_random_downloads_data(m: usize) -> Vec<Vec<u8>> {
     let mut rng = rand::thread_rng();
     let mut sat: Vec<Vec<u8>> = vec![];
