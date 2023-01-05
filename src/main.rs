@@ -1,28 +1,38 @@
 use rand::Rng;
 
+mod utils;
+use utils::csv::write_to_csv_file;
+
 fn main() {
     println!("Hello, world!");
 
     let m = 10; // count of peers
-    let sat_data = rng_tr_data(m);
-    let unsat_data = rng_tr_data(m);
+    let sat_data_file_path: String = "sat_downloads.csv".to_string();
+    let unsat_data_file_path: String = "unsat_downloads.csv".to_string();
 
-    // local trust values
-    let s = mat_sub(sat_data, unsat_data);
+    // // Generate random data & write to files for future use
+    // let sat_downloads = rng_tr_data(m);
+    // write_to_csv_file(&sat_data_file_path, m, &sat_downloads).unwrap();
 
-    // normalized local trust values
-    let c = normalize(s);
+    // let unsat_downloads = rng_tr_data(m);
+    // write_to_csv_file(&unsat_data_file_path, m, &unsat_downloads).unwrap();
 
-    // inversed
-    let c_t = mat_inverse(c.clone());
+    // // local trust values
+    // let s = mat_sub(sat_data, unsat_data);
 
-    // Get the converged c_t value
-    let converged_c_t = converge(c_t);
+    // // normalized local trust values
+    // let c = normalize(s);
 
-    // Final t vector
-    let t = mat_mul(converged_c_t, c);
+    // // inversed
+    // let c_t = mat_inverse(c.clone());
 
-    println!("Global trust values:: {t:?}");
+    // // Get the converged c_t value
+    // let converged_c_t = converge(c_t);
+
+    // // Final t vector
+    // let t = mat_mul(converged_c_t, c);
+
+    // println!("Global trust values:: {t:?}");
 }
 
 fn rng_tr_data(m: usize) -> Vec<Vec<u8>> {
