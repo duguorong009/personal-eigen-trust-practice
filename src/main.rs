@@ -90,12 +90,13 @@ fn basic_eigen_trust(c: SMatrix<f64, M, M>, _peer: usize, a: f64, p: SMatrix<f64
 }
 
 /// Generate random data for simulation & save to files for future use
+#[allow(unused)]
 fn generate_sim_data() {
     let sat_downloads = gen_random_downloads_data(M);
-    write_to_csv_file(&SAT_DATA_FILE, M, &sat_downloads).unwrap();
+    write_to_csv_file(SAT_DATA_FILE, M, &sat_downloads).unwrap();
 
     let unsat_downloads = gen_random_downloads_data(M);
-    write_to_csv_file(&UNSAT_DATA_FILE, M, &unsat_downloads).unwrap();
+    write_to_csv_file(UNSAT_DATA_FILE, M, &unsat_downloads).unwrap();
 }
 
 /// Normalize the matrix of local trust values s(i, j) by using the
